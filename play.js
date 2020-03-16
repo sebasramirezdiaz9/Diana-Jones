@@ -1,5 +1,3 @@
-
-  
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -36,17 +34,21 @@ var config = {
 };
 
 var player;
-var stars;
+var coins;
 var bombs;
 var platforms;
 var cursors;
 var score = 0;
 var gameOver = false;
 var scoreText;
+var livesText;
 var pause_label;
 var menu_pause;
 var paused_status = 1;
 var key_pause;
+var lives = 5;
+var gameOverImg;
+var invincible = false;
 
 var game = new Phaser.Game(config);
 
@@ -54,12 +56,13 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
+    this.load.image('game-over', 'assets/game-over.png')
     this.load.image('menu_pause_continue', 'assets/menu_pause_continue.png');
     this.load.image('menu_pause', 'assets/menu_pause.jpg');
     this.load.image('sky', 'assets/bosque.png');
     this.load.audio('Bonus', 'assets/Bonus.wav')
     this.load.image('ground', 'assets/ground_grass.png');
-    this.load.image('star', 'assets/moneda.png');
+    this.load.image('coin', 'assets/moneda.png');
     this.load.image('plataform', 'assets/platform.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/personaje2.png', { frameWidth: 54, frameHeight: 48 });
@@ -114,16 +117,16 @@ function create ()
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 
-    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-        key: 'star',
+    //  Some coins to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+    coins = this.physics.add.group({
+        key: 'coin',
         repeat: 11,
         setXY: { x: 12, y: 0, stepX: 70 }
     });
 
-    stars.children.iterate(function (child) {
+    coins.children.iterate(function (child) {
 
-        //  Give each star a slightly different bounce
+        //  Give each coin a slightly different bounce
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
     });
@@ -131,15 +134,17 @@ function create ()
     bombs = this.physics.add.group();
 
     //  The score
-    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    scoreText = this.add.text(16, 16, 'Puntuacion: '+score, { fontSize: '32px', fill: '#000' });
+    //  The lives
+    livesText = this.add.text(310, 16, 'Vidas: '+lives, { fontSize: '32px', fill: '#000' });
 
-    //  Collide the player and the stars with the platforms
+    //  Collide the player and the coin with the platforms
     this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(coins, platforms);
     this.physics.add.collider(bombs, platforms);
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    this.physics.add.overlap(player, stars, collectStar, null, this);
+    //  Checks to see if the player overlaps with any of the coins, if he does call the collectCoins function
+    this.physics.add.overlap(player, coins, collectCoin, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 
@@ -199,9 +204,9 @@ function update ()
     }
 }
 
-function collectStar (player, star)
+function collectCoin (player, coin)
 {
-    star.disableBody(true, true);
+    coin.disableBody(true, true);
 
     //  Add and update the score
     score += 10;
@@ -210,12 +215,12 @@ function collectStar (player, star)
 
 
  
-    if (stars.countActive(true) === 0)
+    if (coins.countActive(true) === 0)
 
     {
         
-        //  A new batch of stars to collect
-        stars.children.iterate(function (child) {
+        //  A new batch of coins to collect
+        coins.children.iterate(function (child) {
 
             child.enableBody(true, child.x, 0, true, true);
 
@@ -234,13 +239,28 @@ function collectStar (player, star)
     }
 }
 
-function hitBomb (player, bomb)
+function hitBomb (player)
 {
-    this.physics.pause();
+    if(invincible == false){
+        lives--;
+        player.setTint(0xff0000);
 
+        livesText.setText('Vidas: ' + lives);
 
-    player.anims.play('turn');
+        if (lives <= 0) {
+            this.physics.pause();
+            player.anims.play('turn');
+            this.add.sprite(400, 300, 'game-over');
+            gameOver = true;
+        }    
 
-    gameOver = true;
+        invincible = true;
+        this.time.delayedCall(1500, noDead);
+    }
+}
+
+function noDead() {
+    player.clearTint();
+    invincible = false;
 }
 
