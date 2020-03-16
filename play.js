@@ -1,3 +1,5 @@
+
+  
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -26,6 +28,8 @@ var gameOver = false;
 var scoreText;
 
 var game = new Phaser.Game(config);
+
+
 
 function preload ()
 {
@@ -187,9 +191,11 @@ function hitBomb (player, bomb)
 {
     this.physics.pause();
 
-    player.setTint(0xff0000);
 
     player.anims.play('turn');
 
     gameOver = true;
 }
+
+
+
