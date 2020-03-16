@@ -1,3 +1,5 @@
+
+  
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -47,6 +49,8 @@ var paused_status = 1;
 var key_pause;
 
 var game = new Phaser.Game(config);
+
+
 
 function preload ()
 {
@@ -234,7 +238,6 @@ function hitBomb (player, bomb)
 {
     this.physics.pause();
 
-    player.setTint(0xff0000);
 
     player.anims.play('turn');
 
