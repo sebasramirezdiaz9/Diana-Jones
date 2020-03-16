@@ -6,13 +6,30 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: false
+            debug: true
         }
     },
     scene: {
         preload: preload,
         create: create,
         update: update
+    },
+    input:{
+        keyboard: {
+            target: window
+        },
+        mouse: {
+            target: null,
+            capture: true
+        },
+        activePointers: 1,
+        touch: {
+            target: null,
+            capture: true
+        },
+        smoothFactor: 0,
+        gamepad: false,
+        windowEvents: true,
     }
 };
 
@@ -24,11 +41,17 @@ var cursors;
 var score = 0;
 var gameOver = false;
 var scoreText;
+var pause_label;
+var menu_pause;
+var paused_status = 1;
+var key_pause;
 
 var game = new Phaser.Game(config);
 
 function preload ()
 {
+    this.load.image('menu_pause_continue', 'assets/menu_pause_continue.png');
+    this.load.image('menu_pause', 'assets/menu_pause.jpg');
     this.load.image('sky', 'assets/bosque.png');
     this.load.audio('Bonus', 'assets/Bonus.wav')
     this.load.image('ground', 'assets/ground_grass.png');
@@ -83,6 +106,7 @@ function create ()
         repeat: -1
     });
 
+
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -114,10 +138,33 @@ function create ()
     this.physics.add.overlap(player, stars, collectStar, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+    //Start pause method with button in display
+    pause_label = this.add.text(700, 20, 'Pause', { font: '24px Arial', fill: '#fff'});
+    pause_label.setInteractive().on('pointerdown', function () {
+        // When the paus button is pressed, we pause the game
+        this.scene.physics.world.pause();
+
+        // Then add the menu
+        menu_pause = this.scene.add.sprite(400, 300, 'menu_pause');
+        menu_pause_continue = this.scene.add.sprite(400, 500, 'menu_pause_continue');
+
+        menu_pause_continue.setInteractive().on('pointerdown', function() {
+            menu_pause.destroy();
+            menu_pause_continue.destroy();
+            paused_status = 0;            
+        });
+    });
+    //End pause method
 }
 
 function update ()
 {
+    if(paused_status == 0){
+        paused_status = 1;
+        this.physics.resume();
+    }
+
     if (gameOver)
     {
         return;
@@ -193,3 +240,4 @@ function hitBomb (player, bomb)
 
     gameOver = true;
 }
+
