@@ -6,7 +6,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: true
+            debug: false
         }
     },
     scene: {
@@ -30,7 +30,7 @@ var config = {
         smoothFactor: 0,
         gamepad: false,
         windowEvents: true,
-    }
+    },    
 };
 
 var player;
@@ -49,6 +49,14 @@ var key_pause;
 var lives = 5;
 var gameOverImg;
 var invincible = false;
+var music;
+var band_music = false;
+var music2;
+var bonus;
+var hit_bomb;
+var pause =  true;
+var start_label;
+var gameStart =  false;
 
 var game = new Phaser.Game(config);
 
@@ -56,11 +64,15 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-    this.load.image('game-over', 'assets/game-over.png')
+    this.load.image('start_label', 'assets/start_label.png');
+    this.load.image('game-over', 'assets/game-over.png');
     this.load.image('menu_pause_continue', 'assets/menu_pause_continue.png');
     this.load.image('menu_pause', 'assets/menu_pause.jpg');
     this.load.image('sky', 'assets/bosque.png');
-    this.load.audio('Bonus', 'assets/Bonus.wav')
+    this.load.audio('bonus', 'assets/audio/Bonus.wav');
+    this.load.audio('soundtrack', 'assets/audio/soundtrack.mp3');
+    this.load.audio('hit_bomb', 'assets/audio/hit_bomb.mp3');
+    this.load.audio('loser', 'assets/audio/loser.mp3');
     this.load.image('ground', 'assets/ground_grass.png');
     this.load.image('coin', 'assets/moneda.png');
     this.load.image('plataform', 'assets/platform.png');
@@ -148,29 +160,94 @@ function create ()
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 
+    this.physics.pause();   
+
     //Start pause method with button in display
     pause_label = this.add.text(700, 20, 'Pause', { font: '24px Arial', fill: '#fff'});
     pause_label.setInteractive().on('pointerdown', function () {
         // When the paus button is pressed, we pause the game
         this.scene.physics.world.pause();
-
+        pause = true;
+        band_music = false;
+        music.pause();
         // Then add the menu
-        menu_pause = this.scene.add.sprite(400, 300, 'menu_pause');
-        menu_pause_continue = this.scene.add.sprite(400, 500, 'menu_pause_continue');
+        if(gameOver == false && gameStart == true){
+            menu_pause = this.scene.add.sprite(400, 300, 'menu_pause');
+            menu_pause_continue = this.scene.add.sprite(400, 500, 'menu_pause_continue');
 
-        menu_pause_continue.setInteractive().on('pointerdown', function() {
-            menu_pause.destroy();
-            menu_pause_continue.destroy();
-            paused_status = 0;            
-        });
+            menu_pause_continue.setInteractive().on('pointerdown', function() {
+                menu_pause.destroy();
+                menu_pause_continue.destroy();
+                band_music = true;
+                paused_status = 0;            
+            });
+        }
     });
     //End pause method
+    var configSound = {
+        mute: false,
+        volume: 2,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: true,
+        delay: 0
+    }
+    music = this.sound.add('soundtrack', configSound);
+    var configSound2 = {
+        mute: false,
+        volume: 2,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: true,
+        delay: 0
+    }
+    music2 = this.sound.add('loser', configSound2);
+    var configSound3 = {
+        mute: false,
+        volume: 2,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: false,
+        delay: 0
+    }
+    bonus = this.sound.add('bonus', configSound3);
+    var configSound4 = {
+        mute: false,
+        volume: 3,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: false,
+        delay: 0
+    }
+    hit_bomb = this.sound.add('hit_bomb', configSound4);
+
+    start_label = this.add.sprite(400, 300, 'start_label');
+    start_label.setInteractive().on('pointerdown', function() {
+        this.scene.physics.world.pause();   
+        start_label.destroy();
+        band_music = true;
+        gameStart = true;
+        pause = false;
+        paused_status = 0;            
+    });
+      
+
 }
 
 function update ()
 {
+    if (band_music == true){
+        music.play();
+        band_music = false;
+    }
+
     if(paused_status == 0){
         paused_status = 1;
+        pause = false;
         this.physics.resume();
     }
 
@@ -179,13 +256,13 @@ function update ()
         return;
     }
 
-    if (cursors.left.isDown)
-    {
+    if (cursors.left.isDown && pause == false)
+    {       
         player.setVelocityX(-160);
 
         player.anims.play('left', true);
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown && pause == false)
     {
         player.setVelocityX(160);
 
@@ -198,7 +275,7 @@ function update ()
         player.anims.play('turn');
     }
 
-    if (cursors.up.isDown && player.body.touching.down)
+    if (cursors.up.isDown && player.body.touching.down && pause == false)
     {
         player.setVelocityY(-330);
     }
@@ -206,14 +283,12 @@ function update ()
 
 function collectCoin (player, coin)
 {
+    bonus.play();
     coin.disableBody(true, true);
 
     //  Add and update the score
     score += 10;
-    scoreText.setText('Score: ' + score);
-   
-
-
+    scoreText.setText('Score: ' + score);    
  
     if (coins.countActive(true) === 0)
 
@@ -242,16 +317,19 @@ function collectCoin (player, coin)
 function hitBomb (player)
 {
     if(invincible == false){
+        hit_bomb.play();
         lives--;
         player.setTint(0xff0000);
 
         livesText.setText('Vidas: ' + lives);
-
+        
         if (lives <= 0) {
             this.physics.pause();
             player.anims.play('turn');
             this.add.sprite(400, 300, 'game-over');
-            gameOver = true;
+            gameOver = true;              
+            music.stop();
+            music2.play();
         }    
 
         invincible = true;
