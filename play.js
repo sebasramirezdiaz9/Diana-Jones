@@ -83,7 +83,7 @@ function preload ()
     this.load.image('coin', 'assets/moneda.png');
     this.load.image('plataform', 'assets/platform.png');
     this.load.image('bomb', 'assets/bomb.png');
-    this.load.spritesheet('dude', 'assets/personaje2.png', { frameWidth: 54, frameHeight: 48 });
+    this.load.spritesheet('dude', 'assets/personaje1.png', { frameWidth: 49, frameHeight: 61 });
 }
 
 function create ()

@@ -17,12 +17,12 @@ var game = new Phaser.Game(config);
             this.load.image('sky', 'assets/fondo.jpg');
             this.load.image('title', 'assets/diana_jones.png');
             this.load.image('icon', 'assets/icon.png');
-            this.load.spritesheet ('ayuda','assets/btn2.png',{ frameWidth: 189, frameHeight: 44 });
-            this.load.spritesheet ('jugar','assets/btn3.png',{ frameWidth: 189, frameHeight: 44 });
+            this.load.spritesheet ('help','assets/btn2.png',{ frameWidth: 189, frameHeight: 44 });
+            this.load.spritesheet ('play','assets/btn3.png',{ frameWidth: 189, frameHeight: 44 });
             this.load.image('records', 'assets/records2.png');
          
             this.load.image('icon2', 'assets/icono2.png');
-            this.load.image('salir', 'assets/salir.png');
+            this.load.image('exit', 'assets/salir.png');
 
 
         }
@@ -35,16 +35,16 @@ var game = new Phaser.Game(config);
             this.add.image(590, 400, 'icon2');
          
            
-            var play = this.add.sprite(400,260, 'jugar').setInteractive();
-            var help= this.add.sprite(400,340, 'ayuda').setInteractive();
+            var play = this.add.sprite(400,260, 'play').setInteractive();
+            var help= this.add.sprite(400,340, 'help').setInteractive();
 
             var records= this.add.image(400,420,'records').setInteractive();
-            var salir= this.add.image(728,48,'salir').setInteractive();
+            var exit= this.add.image(728,48,'exit').setInteractive();
          
         
 
             play.on('pointerover', function () {
-                this.setTint(0x44ff44);
+                this.setTint(0xcccccc);
 
              
             });
@@ -57,12 +57,12 @@ var game = new Phaser.Game(config);
             location.assign("play.html");
             
 
-           })); // Start game on click.
+           })); 
 
 
 
            help.on('pointerover', function () {
-            this.setTint(0x44ff44);
+            this.setTint(0xcccccc);
 
          
             });
@@ -76,10 +76,10 @@ var game = new Phaser.Game(config);
                 
             location.assign("ayuda.html");
 
-            }); // Start game on click.
+            }); 
 
             records.on('pointerover', function () {
-                this.setTint(0x44ff44);
+                this.setTint(0xcccccc);
     
              
                 });
@@ -93,31 +93,31 @@ var game = new Phaser.Game(config);
                     
              location.assign("");
     
-            }); // Start game on click.
+            }); 
 
-            salir.on('pointerover', function () {
-                this.setTint(0x44ff44);
+            exit.on('pointerover', function () {
+                this.setTint(0xcccccc);
     
              
                 });
-             salir.on('pointerout', function () { 
+             exit.on('pointerout', function () { 
                     
                  this.clearTint();
                 
                 
              });
-            salir.on('pointerdown', function(){
+            exit.on('pointerdown', function(){
                     window.close();
                 
-            }); // Start game on click.
+            }); 
 
 
-          function cerrarse(){
-              window.closed;
-          }
+          
 
             
         }
+
+        
    
 
       
