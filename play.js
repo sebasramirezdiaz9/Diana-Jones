@@ -304,6 +304,8 @@ function collectCoin (player, coin)
     //  Add and update the score
     score += 10;
     scoreText.setText('Score: ' + score);    
+
+
  
     if (coins.countActive(true) === 0)
 
