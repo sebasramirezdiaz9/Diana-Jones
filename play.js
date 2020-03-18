@@ -57,6 +57,8 @@ var hit_bomb;
 var pause =  true;
 var start_label;
 var gameStart =  false;
+var loading;
+var menu_pause_regresar;
 
 var game = new Phaser.Game(config);
 
@@ -64,11 +66,15 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
+    // Method for loading...
+    loading = this.add.text(500, 500, 'Cargando..... ',{ fontSize: '32px', fill: '#ffffff' });
+    //
     this.load.image('start_label', 'assets/start_label.png');
     this.load.image('game-over', 'assets/game-over.png');
+    this.load.image('menu_pause_regresar', 'assets/volver_menu.png');
     this.load.image('menu_pause_continue', 'assets/menu_pause_continue.png');
     this.load.image('menu_pause', 'assets/menu_pause.jpg');
-    this.load.image('sky', 'assets/bosque.png');
+    this.load.image('sky', 'assets/bosque.png');    
     this.load.audio('bonus', 'assets/audio/Bonus.wav');
     this.load.audio('soundtrack', 'assets/audio/soundtrack.mp3');
     this.load.audio('hit_bomb', 'assets/audio/hit_bomb.mp3');
@@ -81,7 +87,9 @@ function preload ()
 }
 
 function create ()
-{
+{    
+    //Destroy loading
+    loading.destroy();
     //  A simple background for our game
     this.add.image(400, 300, 'sky');
 
@@ -173,13 +181,20 @@ function create ()
         // Then add the menu
         if(gameOver == false && gameStart == true){
             menu_pause = this.scene.add.sprite(400, 300, 'menu_pause');
-            menu_pause_continue = this.scene.add.sprite(400, 500, 'menu_pause_continue');
+            menu_pause_continue = this.scene.add.sprite(400, 350, 'menu_pause_continue');
+            menu_pause_regresar = this.scene.add.sprite(400, 250, 'menu_pause_regresar');
 
             menu_pause_continue.setInteractive().on('pointerdown', function() {
                 menu_pause.destroy();
                 menu_pause_continue.destroy();
+                menu_pause_regresar.destroy();
                 band_music = true;
                 paused_status = 0;            
+            });
+        
+            menu_pause_regresar.setInteractive().on('pointerdown', function() {                
+                gameOver = true;
+                window.location.href="./index.html";            
             });
         }
     });
@@ -327,6 +342,16 @@ function hitBomb (player)
             this.physics.pause();
             player.anims.play('turn');
             this.add.sprite(400, 300, 'game-over');
+            //Text to play again
+            play_again = this.add.text(450, 480, 'Jugar de nuevo', { font: '32px Arial', fill: '#000'});
+            play_again.setInteractive().on('pointerdown', function() {
+                window.location.href="./play.html";                         
+            });
+            //Sprite to return at principal menu
+            menu_pause_regresar = this.add.sprite(200, 500, 'menu_pause_regresar');        
+            menu_pause_regresar.setInteractive().on('pointerdown', function() {                                
+                window.location.href="./index.html";            
+             });
             gameOver = true;              
             music.stop();
             music2.play();
