@@ -571,9 +571,6 @@ function collectBonus(){
 function hitBomb (player)
 {
     if(invincible == false){   
-        if(diamante != null){
-            diamante.disableBody(true, true);
-        }   
 
         if (band_sonido == false){
          hit_bomb.play();
@@ -954,9 +951,7 @@ function collectBonus2(){
 function hitBomb2 (player)
 {
     if(invincible == false){
-        if(diamante != null){
-            diamante.disableBody(true, true);
-        }  
+         
         if (band_sonido == false){
             hit_bomb.play();
         }
