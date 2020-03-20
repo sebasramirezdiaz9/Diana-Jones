@@ -29,6 +29,11 @@ var level=false;
 var level_fond=0;
 var background;
 var start;
+var sonido;
+var sonido_true;
+var sonido_false;
+var button_sonido = true;
+var band_sonido = true;
 
 var SceneA = new Phaser.Class({
 
@@ -44,6 +49,9 @@ var SceneA = new Phaser.Class({
     {
         loading = this.add.text(500, 500, 'Cargando..... ',{ fontSize: '32px', fill: '#ffffff' });
         //
+        this.load.image('diamante', 'assets/diamante.png');
+        this.load.image('sonido_true', 'assets/sonido_true.png');
+        this.load.image('sonido_false', 'assets/sonido_false.png');
         this.load.image('start_label', 'assets/level1.png');
         this.load.image('game-over', 'assets/game-over.png');
         this.load.image('new-game', 'assets/new-game.png');
@@ -64,7 +72,6 @@ var SceneA = new Phaser.Class({
     },
 
     create: function ()
-
     {
         //Destroy loading
         loading.destroy();
@@ -117,13 +124,14 @@ var SceneA = new Phaser.Class({
          repeat: 11,
          setXY: { x: 12, y: 0, stepX: 70 }
      });
- 
+     
      coins.children.iterate(function (child) {
  
          //  Give each coin a slightly different bounce
          child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
  
-     });
+     });     
+
      bombs = this.physics.add.group();
 
      //  The score
@@ -233,12 +241,38 @@ var SceneA = new Phaser.Class({
         paused_status = 0;            
     });
     
-        
+    sonido = this.add.image(750, 555, 'sonido_false');
+    sonido.setInteractive().on('pointerdown', function(){
+        if(gameStart == true && pause == false){
+            if(band_sonido == true){
+                if(sonido_false != null){
+                    sonido_false.destroy();
+                }
+                sonido_true = this.scene.add.sprite(750, 555, 'sonido_true');
+                band_sonido = false;
+                band_music =  true;
+            }else if(band_sonido == false){
+                if(sonido_true != null){
+                    sonido_true.destroy();
+                }
+                sonido_false = this.scene.add.sprite(750, 555, 'sonido_false');
+                band_sonido = true;
+                button_sonido = false;
+                band_music = false;
+            }      
+        }
+    });
     },
 
     update: function ()
     {
-        if (band_music == true){
+        if(button_sonido == false){
+            music.pause();
+            button_sonido = true;
+            band_sonido = true;
+        }
+
+        if (band_music == true && button_sonido == true && band_sonido == false){
             music.play();
             band_music = false;
         }
@@ -290,9 +324,13 @@ var SceneA = new Phaser.Class({
     }
 
 });
+
+
 function collectCoin (player, coin)
 {
-    bonus.play();
+    if (band_sonido == false){
+        bonus.play();
+    }
     coin.disableBody(true, true);
 
     //  Add and update the score
@@ -300,8 +338,7 @@ function collectCoin (player, coin)
     scoreText.setText('Score: ' + score);    
 
     if (coins.countActive(true) === 0)
-
-    {
+    {        
         //  A new batch of coins to collect
         coins.children.iterate(function (child) {
             child.enableBody(true, child.x, 0, true, true);
@@ -316,18 +353,42 @@ function collectCoin (player, coin)
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         bomb.allowGravity = false;
 
+        if((score/150) >= 1){
+            diamante = this.physics.add.sprite(x, 16, 'diamante');
+            this.physics.add.collider(diamante, platforms);
+            this.physics.add.overlap(player, diamante, collectBonus, null, this);
+        }
+
         //repite the level 1
-    if(score>230){
+    if(score>400){
         level=true;
     }
     }
+    
 } 
+
+function collectBonus(){
+    if (band_sonido == false){
+        bonus.play();
+    }
+    diamante.disableBody(true, true);
+
+    //  Add and update the score
+    score += 35;
+    scoreText.setText('Score: ' + score); 
+}
 
 
 function hitBomb (player)
 {
-    if(invincible == false){
-        hit_bomb.play();
+    if(invincible == false){   
+        if(diamante != null){
+            diamante.disableBody(true, true);
+        }   
+
+        if (band_sonido == false){
+         hit_bomb.play();
+        }
         lives--;
         player.setTint(0xff0000);
 
@@ -340,7 +401,7 @@ function hitBomb (player)
             //Text to play again
             play_again = this.add.image(600, 500, 'new-game');
             play_again.setInteractive().on('pointerdown', function() {
-                window.location.href="./play.html";                         
+                window.location.href="./game.html";                         
             });
             //Sprite to return at principal menu
             menu_pause_regresar = this.add.sprite(200, 500, 'menu_pause_regresar');        
@@ -349,7 +410,9 @@ function hitBomb (player)
              });
             gameOver = true;              
             music.stop();
-            music2.play();
+            if(band_sonido == false){
+                music.play();
+            } 
         }    
 
         invincible = true;
@@ -376,6 +439,9 @@ var SceneB = new Phaser.Class({
     {
         loading = this.add.text(500, 500, 'Cargando..... ',{ fontSize: '32px', fill: '#ffffff' });
         //
+        this.load.image('diamante', 'assets/diamante.png');
+        this.load.image('sonido_true', 'assets/sonido_true.png');
+        this.load.image('sonido_false', 'assets/sonido_false.png');
         this.load.image('start', 'assets/level2.png');
         this.load.image('game-over', 'assets/game-over.png');
         this.load.image('menu_pause_regresar', 'assets/menu.png');
@@ -395,7 +461,6 @@ var SceneB = new Phaser.Class({
     },
 
     create: function ()
-
     {
         //Destroy loading
         loading.destroy();
@@ -556,16 +621,44 @@ var SceneB = new Phaser.Class({
         pause = false;
         paused_status = 0;            
     });
+
+    sonido = this.add.image(750, 555, 'sonido_false');
+    sonido.setInteractive().on('pointerdown', function(){
+        if(gameStart == true && pause == false){
+            if(band_sonido == true){
+                if(sonido_false != null){
+                    sonido_false.destroy();
+                }
+                sonido_true = this.scene.add.sprite(750, 555, 'sonido_true');
+                band_sonido = false;
+                band_music =  true;
+            }else if(band_sonido == false){
+                if(sonido_true != null){
+                    sonido_true.destroy();
+                }
+                sonido_false = this.scene.add.sprite(750, 555, 'sonido_false');
+                band_sonido = true;
+                button_sonido = false;
+                band_music = false;
+            }      
+        }
+    });
         
     },
 
     update: function ()
     {
-        if (band_music == true){
+        if(button_sonido == false){
+            music.pause();
+            button_sonido = true;
+            band_sonido = true;
+        }
+
+        if (band_music == true && button_sonido == true && band_sonido == false){
             music.play();
             band_music = false;
         }
-    
+
         if(paused_status == 0){
             paused_status = 1;
             pause = false;
@@ -605,7 +698,9 @@ var SceneB = new Phaser.Class({
 });
 function collectCoin_leve2 (player, coin)
 {
-    bonus.play();
+    if (band_sonido == false){
+        bonus.play();
+    }
     coin.disableBody(true, true);
 
     //  Add and update the score
@@ -629,12 +724,36 @@ function collectCoin_leve2 (player, coin)
         bomb.setCollideWorldBounds(true);
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
         bomb.allowGravity = false;
+
+        if((score/150) >= 1){
+            diamante = this.physics.add.sprite(x, 16, 'diamante');
+            this.physics.add.collider(diamante, platforms2);
+            this.physics.add.overlap(player, diamante, collectBonus2, null, this);
+        }
     }
 }
+
+
+function collectBonus2(){
+    if (band_sonido == false){
+        bonus.play();
+    }
+    diamante.disableBody(true, true);
+
+    //  Add and update the score
+    score += 35;
+    scoreText.setText('Score: ' + score); 
+}
+
 function hitBomb2 (player)
 {
     if(invincible == false){
-        hit_bomb.play();
+        if(diamante != null){
+            diamante.disableBody(true, true);
+        }  
+        if (band_sonido == false){
+            hit_bomb.play();
+        }
         lives--;
         player.setTint(0xff0000);
 
@@ -656,7 +775,9 @@ function hitBomb2 (player)
              });
             gameOver = true;              
             music.stop();
-            music2.play();
+            if(band_sonido == false){
+                music2.play();
+            }            
         }    
 
         invincible = true;
