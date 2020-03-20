@@ -401,7 +401,7 @@ function hitBomb (player)
             //Text to play again
             play_again = this.add.image(600, 500, 'new-game');
             play_again.setInteractive().on('pointerdown', function() {
-                window.location.href="./game.html";                         
+                window.location.href="./play.html";                         
             });
             //Sprite to return at principal menu
             menu_pause_regresar = this.add.sprite(200, 500, 'menu_pause_regresar');        
