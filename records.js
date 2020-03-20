@@ -21,29 +21,14 @@ if(records == null)
     records = [];
 }
 
-function lista()
-{
-    var aLenght = records.length;
-    
-    var tabla="<tr><th>Jugador</th><th>Score</th></tr>";
-
-    for(var i in records)
-    {
-        var record = JSON.parse(records[i]);
-
-        tabla += "<tr><td>"+record.name+"</td><td>"+record.score+"</td></tr>";
-    }
-    document.getElementById("table").innerHTML = tabla;
-}
 var game = new Phaser.Game(config);
 
         function preload ()
         {
             this.load.image('sky', 'assets/fondo.jpg');
             this.load.image('title', 'assets/record_title.png');
-            this.load.html('tableRecord', './records.html');
+            //this.load.html('tableRecord', './records.html');
             this.load.image('exit', 'assets/salir.png');
-            lista();
 
         }
 
@@ -51,10 +36,21 @@ var game = new Phaser.Game(config);
         {
             this.add.image(400, 300, 'sky');
             this.add.image(400, 120, 'title');
-         
+            this.add.text(450, 185, "Score", { fontSize: '30px', fill: '#000' });
+            this.add.text(250, 185, "Jugador", { fontSize: '30px', fill: '#000' });
+            for(let i = 0; i<records.length; i++)
+            {
+                var record = JSON.parse(records[i]);
+                this.add.text(450, (225 + (i*30)), record.score, { fontSize: '25px', fill: '#000' });
+                this.add.text(250, (225 + (i*30)), record.name, { fontSize: '25px', fill: '#000' });
+                if(i>5)
+                {
+                    break;
+                }
+            }
             var exit= this.add.image(728,48,'exit').setInteractive();
             
-            var element = this.add.dom(400, 0).createFromCache('tableRecord');
+            //var element = this.add.dom(400, 0).createFromCache('tableRecord');
 
             exit.on('pointerover', function () {
                 this.setTint(0xcccccc);
@@ -71,13 +67,6 @@ var game = new Phaser.Game(config);
                 location.assign("menu.html");
                 
             }); 
-            this.tweens.add({
-                targets: element,
-                y: 300,
-                duration: 3000,
-                ease: 'Power3'
-            });
-
         }
 
         
