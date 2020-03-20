@@ -32,7 +32,7 @@ var game = new Phaser.Game(config);
             this.add.image(400, 300, 'sky');
             this.add.image(400, 120, 'title');
             this.add.image(150, 400, 'icon');
-            this.add.image(590, 400, 'icon2');
+            this.add.image(650, 400, 'icon2');
          
            
             var play = this.add.sprite(400,260, 'play').setInteractive();
@@ -56,7 +56,6 @@ var game = new Phaser.Game(config);
             
             location.assign("play.html");
             
-
            })); 
 
 
@@ -91,7 +90,7 @@ var game = new Phaser.Game(config);
              });
             records.on('pointerdown', function(){
                     
-             location.assign("");
+             location.assign("records.html");
     
             }); 
 

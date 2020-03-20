@@ -1,4 +1,5 @@
 var player;
+var playerSelected;
 var coins;
 var bombs;
 var platforms;
@@ -29,6 +30,186 @@ var level=false;
 var level_fond=0;
 var background;
 var start;
+var name = '';
+var text;
+var record;
+
+var Scene2 = new Phaser.Class({
+
+    Extends: Phaser.Scene,
+
+    initialize:
+
+    function Scene2 ()
+    {
+        Phaser.Scene.call(this, { key: 'Scene2', active: true });
+    },
+
+    preload: function()
+    {
+        this.load.html('nameform', './name.html');
+        this.load.image('sky', 'assets/fondo.jpg');
+        this.load.image('title','assets/name.png' );
+        this.load.image('next','assets/siguiente.png' );
+
+    },
+
+    create: function()
+    {
+        this.add.image(400, 300, 'sky');
+        this.add.image(400, 200, 'title');
+        var next = this.add.image(400,400,'next').setInteractive();
+        /*this.input.on('dragstart', function (pointer, gameObject) {
+
+            this.children.bringToTop(gameObject);
+    
+        }, this);
+    
+        this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+    
+            gameObject.x = dragX;
+            gameObject.y = dragY;
+    
+        });*/
+    
+        var element = this.add.dom(400, 0).createFromCache('nameform');
+    
+        next.on('pointerover', function () {
+            this.setTint(0xcccccc);
+            });
+         next.on('pointerout', function () { 
+                
+             this.clearTint();
+            
+            
+         });
+        next.on('pointerdown', function(){
+            var inputText = element.getChildByName('nameField');
+
+            //  Have they entered anything?
+            if (inputText.value !== '')
+            {
+                name = inputText.value;
+            }
+            else
+            {
+                name = "Anonimo"; 
+                
+            }
+        });  
+     
+        this.tweens.add({
+            targets: element,
+            y: 300,
+            duration: 3000,
+            ease: 'Power3'
+        });
+    },
+
+    update: function()
+    {
+        if(name !== ''){
+            this.scene.pause();
+            this.scene.start("Scene1");
+            
+            
+        }
+    }
+
+});
+var Scene1 = new Phaser.Class({
+
+    Extends: Phaser.Scene,
+
+    initialize:
+
+    function Scene1 ()
+    {
+        Phaser.Scene.call(this, { key: 'Scene1'});
+    },
+
+    preload: function ()
+    {
+        this.load.image('chosee', 'assets/chosee.png');
+        this.load.image('sky', 'assets/fondo.jpg');
+        this.load.image('icon', 'assets/icon.png');
+        this.load.image('icon2', 'assets/icono2.png');
+        this.load.image('exit', 'assets/salir.png');
+
+    },
+
+    create: function ()
+    {
+        this.add.image(400, 300, 'sky');
+      
+        this.add.image(400, 100, 'chosee');
+        var icon2 = this.add.image(600,300,'icon2').setInteractive();
+        
+        icon2.on('pointerover', function () {
+            this.setTint(0xcccccc);
+    
+         
+            });
+         icon2.on('pointerout', function () { 
+                
+             this.clearTint();
+            
+            
+         });
+        icon2.on('pointerdown', function(){
+            playerSelected = 1;
+            
+            
+        });  
+
+        var icon = this.add.image(200,300,'icon').setInteractive();
+        
+        icon.on('pointerover', function () {
+            this.setTint(0xcccccc);
+    
+         
+            });
+         icon.on('pointerout', function () { 
+                
+             this.clearTint();
+            
+            
+         });
+        icon.on('pointerdown', function(){
+            playerSelected = 0;
+            
+            
+        });  
+
+        var exit = this.add.image(728,48,'exit').setInteractive();
+        
+        exit.on('pointerover', function () {
+            this.setTint(0xcccccc);
+    
+         
+            });
+         exit.on('pointerout', function () { 
+                
+             this.clearTint();
+            
+            
+         });
+        exit.on('pointerdown', function(){
+            location.assign("menu.html");
+            
+        });  
+
+    },
+
+    update: function (time, delta)
+    {
+        if(playerSelected == 1 || playerSelected == 0){
+            this.scene.pause();
+            this.scene.start("SceneA");
+        }
+    }
+
+});
 var sonido;
 var sonido_true;
 var sonido_false;
@@ -43,7 +224,7 @@ var SceneA = new Phaser.Class({
 
     function  SceneA ()
     {
-        Phaser.Scene.call(this, { key: 'SceneA', active: true });
+        Phaser.Scene.call(this, { key: 'SceneA'});
     },
     preload: function ()
     {
@@ -58,7 +239,7 @@ var SceneA = new Phaser.Class({
         this.load.image('menu_pause_regresar', 'assets/menu.png');
         this.load.image('menu_pause_continue', 'assets/menu_pause_continue.png');
         this.load.image('menu_pause', 'assets/menu_pause.jpg');
-        this.load.image('sky', 'assets/bosque.png'); 
+        this.load.image('sky2', 'assets/bosque.png'); 
         this.load.image('level2', 'assets/sky.png'); 
         this.load.audio('bonus', 'assets/audio/Bonus.wav');
         this.load.audio('soundtrack', 'assets/audio/soundtrack.mp3');
@@ -68,17 +249,24 @@ var SceneA = new Phaser.Class({
         this.load.image('coin', 'assets/moneda.png');
         this.load.image('plataform', 'assets/platform.png');
         this.load.image('bomb', 'assets/bomb.png');
-        this.load.spritesheet('dude', 'assets/personaje1.png', { frameWidth: 49, frameHeight: 61 });
+        if(playerSelected == 0)
+        {
+            this.load.spritesheet('dude', 'assets/personaje2.png', { frameWidth: 54, frameHeight: 48 });
+        }
+        if(playerSelected == 1)
+        {
+            this.load.spritesheet('dude', 'assets/personaje1.png', { frameWidth: 49, frameHeight: 61 });
+        }
     },
 
     create: function ()
     {
         //Destroy loading
         loading.destroy();
-  
+        
         
     //  The platforms group contains the ground and the 2 ledges we can jump on
-        background= this.add.image(400, 300, 'sky');
+        background= this.add.image(400, 300, 'sky2');
         platforms = this.physics.add.staticGroup();
         
         //  Here we create the ground.
@@ -135,15 +323,16 @@ var SceneA = new Phaser.Class({
      bombs = this.physics.add.group();
 
      //  The score
-     scoreText = this.add.text(16, 16, 'Puntuacion: '+score, { fontSize: '32px', fill: '#000' });
+     scoreText = this.add.text(16, 550, 'Score: '+score, { fontSize: '20px', fill: '#FFF' });
      if(scoreText==240){
         this.scene.start("SceneB");
-        console.log("hola");
         
     }
      //  The lives
-     livesText = this.add.text(310, 16, 'Vidas: '+lives, { fontSize: '32px', fill: '#000' });
-     this.add.text(500, 25, 'Nivel 1', { fontSize: '20px', fill: '#000' });
+     livesText = this.add.text(220, 550, 'Vidas: '+lives, { fontSize: '20px', fill: '#FFF' });
+     this.add.text(350, 550, 'Nivel: 1', { fontSize: '20px', fill: '#FFF' });
+
+     this.add.text(500, 550, 'Jugador:'+name, { fontSize: '20px', fill: '#FFF' });
  
      //  Collide the player and the coin with the platforms
      this.physics.add.collider(player, platforms);
@@ -410,6 +599,23 @@ function hitBomb (player)
              });
             gameOver = true;              
             music.stop();
+            music2.play();
+            var records = localStorage.getItem("records");
+            records = JSON.parse(records);
+
+            if(records == null)
+            {
+                records = [];
+            }
+
+            record = JSON.stringify({
+                name:name,
+                score:score
+            });
+
+            records.push(record);
+            localStorage.setItem("records", JSON.stringify(records));
+            }    
             if(band_sonido == false){
                 music.play();
             } 
@@ -417,7 +623,6 @@ function hitBomb (player)
 
         invincible = true;
         this.time.delayedCall(1500, noDead);
-    }
 }
 
 function noDead() {
@@ -522,13 +727,14 @@ var SceneB = new Phaser.Class({
  
      });
      bombs = this.physics.add.group();
-
      //  The score
-     scoreText = this.add.text(16, 16, 'Puntuacion: '+score, { fontSize: '32px', fill: '#000' });
-     this.add.text(500, 25, 'Nivel 2', { fontSize: '20px', fill: '#000' });
+     scoreText = this.add.text(16, 550, 'Puntuacion: '+score, { fontSize: '20px', fill: '#FFF' });
+     this.add.text(400, 550, 'Nivel 2', { fontSize: '20px', fill: '#FFF' });
      //  The lives
-     livesText = this.add.text(310, 16, 'Vidas: '+lives, { fontSize: '32px', fill: '#000' });
- 
+     livesText = this.add.text(250, 550, 'Vidas: '+lives, { fontSize: '20px', fill: '#FFF' });
+    
+     this.add.text(500, 550, 'Jugador:'+name, { fontSize: '20px', fill: '#FFF' });
+
      //  Collide the player and the coin with the platforms
      this.physics.add.collider(player, platforms2);
      this.physics.add.collider(coins, platforms2);
@@ -797,7 +1003,7 @@ var config = {
             debug: false
         }
     },
-    scene: [SceneA,SceneB],
+    scene: [Scene2, Scene1, SceneA, SceneB],
     input:{
         keyboard: {
             target: window
@@ -814,7 +1020,12 @@ var config = {
         smoothFactor: 0,
         gamepad: false,
         windowEvents: true,
-    }    
+    },    
+    parent: 'phaser-example',
+    backgroundColor: '#222288',
+    dom: {
+        createContainer: true
+    },
 };
 
 
